@@ -1,7 +1,7 @@
 from datetime import datetime
 
-from sqlalchemy import Boolean, Column, DateTime, Integer, String, Text
-from sqlalchemy.orm import declarative_base
+from sqlalchemy import Boolean, Column, DateTime, Integer, String, Text, Table, ForeignKey
+from sqlalchemy.orm import declarative_base, relationship
 
 Base = declarative_base()
 
@@ -11,6 +11,21 @@ class TimestampMixin:
     updated_at = Column(
         DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
     )
+
+
+note_tags = Table(
+    "note_tags",
+    Base.metadata,
+    Column("note_id", ForeignKey("notes.id"), primary_key=True),
+    Column("tag_id", ForeignKey("tags.id"), primary_key=True),
+)
+
+action_item_tags = Table(
+    "action_item_tags",
+    Base.metadata,
+    Column("action_item_id", ForeignKey("action_items.id"), primary_key=True),
+    Column("tag_id", ForeignKey("tags.id"), primary_key=True),
+)
 
 
 class Note(Base, TimestampMixin):
@@ -29,3 +44,9 @@ class ActionItem(Base, TimestampMixin):
     completed = Column(Boolean, default=False, nullable=False)
 
 
+class Tag(Base, TimestampMixin):
+    __tablename__ = "tags"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(50), unique=True, nullable=False, index=True)
+    color = Column(String(7), default="#6B7280")
